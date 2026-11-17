@@ -16,3 +16,15 @@ python main.py
 - Registro de un producto.
 - Cálculo de ingresos.
 - Validación de precios y cantidades.
+
+## Equipo de desarrollo
+
+- Estudiante A: Ronald Cabrera
+- Estudiante B: Jorge Bermúdez 
+
+## Tecnologías
+
+- Python
+- Git
+- GitHub
+- Visual Studio Code
