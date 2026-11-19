@@ -1,0 +1,62 @@
+name: CI/CD ventas
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Pruebas Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Ejecutar pruebas unitarias
+        run: python -m unittest discover -s tests -v
+
+  build:
+    name: Construir reporte       
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Generar y comprobar el HTML
+        run: |
+          python generar_reporte.py
+          test -s dist/index.html
+          grep -F 'Total: CRC 90.00' dist/index.html
+      - name: Empaquetar para Pages
+        if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    name: Publicar en GitHub Pages
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar artefacto
+        id: deployment
+        uses: actions/deploy-pages@v4
